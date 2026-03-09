@@ -1,16 +1,17 @@
-import PageObject from '../PageObject';
+import { PageObject } from '../PageObject';
 
-class HomePageObject extends PageObject {
-  url = '/#/';
-
-  get usernameLink() {
-    return cy.getByDataCy('username-link');
+class HomePage extends PageObject {
+  openNewArticle() {
+    this.clickByQa('new-article');
   }
 
-  assertHeaderContainUsername(username) {
-    this.usernameLink
-      .should('contain', username);
+  openSettings() {
+    this.clickByQa('settings-link');
+  }
+
+  openProfile() {
+    this.clickByQa('profile-link');
   }
 }
 
-export default HomePageObject;
+export default new HomePage();

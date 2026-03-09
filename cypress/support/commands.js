@@ -24,18 +24,30 @@
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
 
-import { addMatchImageSnapshotCommand } from 'cypress-image-snapshot/command';
+// import { addMatchImageSnapshotCommand } from 'cypress-image-snapshot/command';
 
-addMatchImageSnapshotCommand();
+// addMatchImageSnapshotCommand();
 
-Cypress.Commands.add('getByDataCy', (selector) => {
-  cy.get(`[data-cy="${selector}"]`);
-});
+// Cypress.Commands.add('getByDataCy', (selector) => {
+//   cy.get(`[data-cy="${selector}"]`);
+// });
 
-Cypress.Commands.add('register', (email = 'riot@qa.team', username = 'riot', password = '12345Qwert!') => {
-  cy.request('POST', '/users', {
-    email,
-    username,
-    password
-  });
+// Cypress.Commands.add(
+//   'register',
+//   (email = 'riot@qa.team', username = 'riot', password = '12345Qwert!') => {
+//     cy.request('POST', '/users', {
+//       email,
+//       username,
+//       password,
+//     });
+//   },
+// );
+
+Cypress.Commands.add('login', (email, password) => {
+  cy.visit('/login');
+
+  cy.get('[data-qa="login-email"]').type(email);
+  cy.get('[data-qa="login-password"]').type(password);
+
+  cy.get('[data-qa="login-submit"]').click();
 });
