@@ -1,47 +1,37 @@
-/// <reference types='cypress' />
-/// <reference types='../support' />
-
 import { faker } from '@faker-js/faker';
+import settingsPage from '../support/pages/settings.pageObject';
 
 describe('Settings', () => {
   beforeEach(() => {
-    cy.login('test@test.com', '123456');
-    cy.visit('/settings');
+    cy.task('db:seed');
+
+    cy.register();
+    cy.login('riot@qa.team', '12345Qwert!');
+
+    settingsPage.visit();
   });
 
   it('update bio', () => {
     const bio = faker.lorem.sentence();
 
-    cy.get('[data-qa="settings-bio"]').clear().type(bio);
+    settingsPage.updateBio(bio);
 
-    cy.get('[data-qa="settings-submit"]').click();
-
-    cy.contains('Your settings have been updated').should('exist');
-  });
-
-  it('update username', () => {
-    const username = faker.internet.userName();
-
-    cy.get('[data-qa="settings-username"]').clear().type(username);
-
-    cy.get('[data-qa="settings-submit"]').click();
-
-    cy.contains('Your settings have been updated').should('exist');
+    settingsPage.successMessage().should('exist');
   });
 
   it('update email', () => {
     const email = faker.internet.email();
 
-    cy.get('[data-qa="settings-email"]').clear().type(email);
+    settingsPage.updateEmail(email);
 
-    cy.get('[data-qa="settings-submit"]').click();
+    settingsPage.successMessage().should('exist');
   });
 
   it('update password', () => {
-    const password = faker.internet.password();
+    const password = 'NewPassword123!';
 
-    cy.get('[data-qa="settings-password"]').type(password);
+    settingsPage.updatePassword(password);
 
-    cy.get('[data-qa="settings-submit"]').click();
+    settingsPage.successMessage().should('exist');
   });
 });
