@@ -1,27 +1,34 @@
-import { PageObject } from '../PageObject';
+import PageObject from '../PageObject';
 
-class SignInPage extends PageObject {
-  visit() {
-    super.visit('/login');
+class SignInPageObject extends PageObject {
+  url = '/#/login';
+
+  get emailField() {
+    return cy.getByDataCy('email-sign-in');
   }
 
-  fillEmail(email) {
-    this.typeByQa('login-email', email);
+  get passwordField() {
+    return cy.getByDataCy('password-sign-in');
   }
 
-  fillPassword(password) {
-    this.typeByQa('login-password', password);
+  get signInBtn() {
+    return cy.getByDataCy('sign-in-btn');
   }
 
-  submit() {
-    this.clickByQa('login-submit');
+  typeEmail(email) {
+    this.emailField
+      .type(email);
   }
 
-  login(email, password) {
-    this.fillEmail(email);
-    this.fillPassword(password);
-    this.submit();
+  typePassword(password) {
+    this.passwordField
+      .type(password);
+  }
+
+  clickSignInBtn() {
+    this.signInBtn
+      .click();
   }
 }
 
-export default new SignInPage();
+export default SignInPageObject;

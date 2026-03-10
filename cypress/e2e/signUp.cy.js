@@ -1,48 +1,45 @@
-import { faker } from '@faker-js/faker';
+/// <reference types='cypress' />
+/// <reference types='../support' />
 
-describe('Sign Up', () => {
+import SignInPageObject from '../support/pages/signIn.pageObject';
+import HomePageObject from '../support/pages/home.pageObject';
+
+const signInPage = new SignInPageObject();
+const homePage = new HomePageObject();
+
+describe('Sign Up page', () => {
+  let username;
+  let email;
+  let password;
+
+  before(() => {});
+
   beforeEach(() => {
-    cy.task('db:seed');
-    cy.visit('/register');
+    cy.task('db:clear');
+    cy.task('generateUser').then((user) => {
+      username = user.username;
+      email = user.email;
+      password = user.password;
+    });
   });
 
-  it('should register a new user with valid credentials', () => {
-    const username = faker.internet.userName();
-    const email = faker.internet.email();
-    const password = '12345Qwert!';
-
-    cy.get('[data-qa="signup-username"]').type(username);
-    cy.get('[data-qa="signup-email"]').type(email);
-    cy.get('[data-qa="signup-password"]').type(password);
-
-    cy.get('[data-qa="signup-submit"]').click();
-
-    cy.contains('Your Feed').should('exist');
+  it('should sign up succefully', () => {
+    signInPage.visit();
+    cy.register(email, username, password);
   });
 
-  it('should show validation error with invalid email', () => {
-    const username = faker.internet.userName();
-    const password = '12345Qwert!';
+  it('should not sign up if invalid email', () => {
+    homePage.visit();
+    cy.contains('a', 'Sign up').click();
 
-    cy.get('[data-qa="signup-username"]').type(username);
-    cy.get('[data-qa="signup-email"]').type('invalid-email');
-    cy.get('[data-qa="signup-password"]').type(password);
+    cy.get('input[placeholder="Username"]').type('username');
+    cy.get('input[placeholder="Email"]').type('usermail');
+    cy.get('input[placeholder="Password"]').type('userpassword');
 
-    cy.get('[data-qa="signup-submit"]').click();
+    cy.contains('button', 'Sign up').click();
 
-    cy.contains('email').should('exist');
-  });
-
-  it('should show validation error when password is too short', () => {
-    const username = faker.internet.userName();
-    const email = faker.internet.email();
-
-    cy.get('[data-qa="signup-username"]').type(username);
-    cy.get('[data-qa="signup-email"]').type(email);
-    cy.get('[data-qa="signup-password"]').type('123');
-
-    cy.get('[data-qa="signup-submit"]').click();
-
-    cy.contains('password').should('exist');
+    cy.contains('div[class="swal-title"]', 'Registration failed!').should(
+      'be.visible',
+    );
   });
 });

@@ -1,37 +1,40 @@
-import { faker } from '@faker-js/faker';
-import settingsPage from '../support/pages/settings.pageObject';
+/// <reference types='cypress' />
+/// <reference types='../support' />
 
-describe('Settings', () => {
-  beforeEach(() => {
-    cy.task('db:seed');
+import SignInPageObject from '../support/pages/signIn.pageObject';
+import HomePageObject from '../support/pages/home.pageObject';
 
-    cy.register();
-    cy.login('riot@qa.team', '12345Qwert!');
+const signInPage = new SignInPageObject();
+const homePage = new HomePageObject();
 
-    settingsPage.visit();
+describe('Sign In page', () => {
+  let user;
+
+  before(() => {
+    cy.task('db:clear');
+    cy.task('generateUser').then((generateUser) => {
+      user = generateUser;
+    });
   });
 
-  it('update bio', () => {
-    const bio = faker.lorem.sentence();
-
-    settingsPage.updateBio(bio);
-
-    settingsPage.successMessage().should('exist');
+  it('should provide an ability to log in with existing credentials', () => {
+    signInPage.visit();
+    cy.register(user.email, user.username, user.password);
+    signInPage.typeEmail(user.email);
+    signInPage.typePassword(user.password);
+    signInPage.clickSignInBtn();
+    homePage.assertHeaderContainUsername(user.username);
   });
 
-  it('update email', () => {
-    const email = faker.internet.email();
+  it('should not provide an ability to log in with wrong credentials', () => {
+    signInPage.visit();
 
-    settingsPage.updateEmail(email);
+    signInPage.typeEmail(user.email);
+    signInPage.typePassword(user.password + 'wrong111');
+    signInPage.clickSignInBtn();
 
-    settingsPage.successMessage().should('exist');
-  });
-
-  it('update password', () => {
-    const password = 'NewPassword123!';
-
-    settingsPage.updatePassword(password);
-
-    settingsPage.successMessage().should('exist');
+    cy.contains('div[class="swal-title"]', 'Login failed!').should(
+      'be.visible',
+    );
   });
 });

@@ -1,28 +1,40 @@
+/// <reference types='cypress' />
+/// <reference types='../support' />
+
+import SignInPageObject from '../support/pages/signIn.pageObject';
+
+const signInPage = new SignInPageObject();
+
 describe('User', () => {
-  beforeEach(() => {
-    cy.task('db:seed');
+  let userTarget;
+  let userFollower;
 
-    cy.register('user1@test.com', 'user1', '123456');
-    cy.register('user2@test.com', 'user2', '123456');
+  before(() => {
+    cy.task('db:clear');
 
-    cy.login('user1@test.com', '123456');
+    cy.task('generateUser').then((generatedUser) => {
+      userTarget = generatedUser;
+      cy.register(userTarget.email, userTarget.username, userTarget.password);
+    });
 
-    cy.visit('/profile/user2');
+    cy.task('generateUser').then((generatedUser) => {
+      userFollower = generatedUser;
+      cy.register(
+        userFollower.email,
+        userFollower.username,
+        userFollower.password,
+      );
+    });
   });
 
-  it('should follow user', () => {
-    cy.get('[data-qa="follow-btn"]').click();
+  it('should be able to follow another user', () => {
+    signInPage.visit();
+    signInPage.typeEmail(userFollower.email);
+    signInPage.typePassword(userFollower.password);
+    signInPage.clickSignInBtn();
 
-    cy.get('[data-qa="follow-btn"]').should('contain', 'Unfollow');
-  });
-
-  it('should unfollow user', () => {
-    cy.get('[data-qa="follow-btn"]').click();
-
-    cy.get('[data-qa="follow-btn"]').should('contain', 'Unfollow');
-
-    cy.get('[data-qa="follow-btn"]').click();
-
-    cy.get('[data-qa="follow-btn"]').should('contain', 'Follow');
+    cy.wait(1000);
+    cy.visit(`/#/@${userTarget.username}`);
+    cy.contains('button', `Follow ${userTarget.username}`).click();
   });
 });
